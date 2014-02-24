@@ -1,0 +1,69 @@
+#!/usr/bin/env node
+
+/* Copyright 2014 Twitter, Inc. and other contributors; Licensed MIT */
+
+var fs = require('fs');
+var program = require('commander');
+var flip = require('../lib/css-flip');
+
+program
+  .usage('[options] <file ...>\n\n  css-flip is a CSS BiDi flipper.')
+  .version(require('../package.json').version)
+  .option('-c, --compress', 'compress whitespace')
+  .option('-o, --output <file>', 'specify an output file')
+  .option('-, --stdin', 'read from stdin')
+  .parse(process.argv);
+
+var options = { compress: program.compress };
+
+if (program.stdin) {
+  flipStdin(options, done);
+}
+else if (program.args.length) {
+  flipFiles(program.args, options, done);
+}
+else {
+  program.help();
+}
+
+
+// -- Functions --
+
+// Writes the given CSS to disk or stdout.
+function done(css) {
+  if (program.output) {
+    return fs.writeFileSync(program.output, css);
+  }
+
+  process.stdout.write(css);
+}
+
+// Flips each file and passes the concatenated result to the callback.
+function flipFiles(files, options, cb) {
+  var css = files.reduce(function (acc, file) {
+      if (!fs.existsSync(file)) {
+        return acc;
+      }
+
+      return acc.concat(flip(fs.readFileSync(file, 'utf8'), options));
+    }, []);
+
+  cb(css.join('\n'));
+}
+
+// Collects stdin and passes the flipped result to the callback.
+function flipStdin(options, cb) {
+  var css = [];
+  var stdin = process.stdin;
+
+  stdin.on('data', function (chunk) {
+    css.push(chunk);
+  });
+
+  stdin.on('end', function () {
+    cb(flip(css.join(''), options));
+  });
+
+  stdin.setEncoding('utf8');
+  stdin.resume();
+}

@@ -1,0 +1,9 @@
+{
+  "node": true,
+  "expr": true,
+
+  "predef": [
+    "describe",
+    "it"
+  ]
+}
