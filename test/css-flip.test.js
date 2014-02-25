@@ -300,6 +300,12 @@ describe('lettercase', function () {
   });
 });
 
+describe('invalid CSS', function () {
+  it('should not crash', function () {
+    ensure('p{__proto__:42;toString:lolwat;}', 'p{__proto__:42;tostring:lolwat;}');
+  });
+});
+
 describe('rework', function () {
   var reworkFlip = flip.rework();
   var css = require('css');
