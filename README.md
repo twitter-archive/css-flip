@@ -31,6 +31,18 @@ p {
 }
 ```
 
+### Rework
+
+Use css-flip as a [Rework](https://github.com/reworkcss/rework) plugin with
+`flip.rework()`.
+
+```js
+var flip = require('css-flip');
+var rework = require('rework');
+
+rework(css).use(flip.rework());
+```
+
 ### @noflip
 
 Use the `@noflip` directive to prevent a single declaration from being flipped.
