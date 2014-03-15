@@ -1,51 +1,76 @@
 # css-flip [![Build Status](https://travis-ci.org/twitter/css-flip.png)](https://travis-ci.org/twitter/css-flip)
 
-A CSS BiDi flipper.
+A CSS BiDi flipper. Generate left-to-right (LTR) or right-to-left (RTL) CSS from your source.
 
-## Usage
+## Installation
 
 ```sh
-npm install --save-dev css-flip
+npm install css-flip
 ```
 
+## Example use
 
 ```js
 var flip = require('css-flip');
+var css = 'div { float: left; }';
 
 flip(css);
+// => 'div { float: right; }'
 ```
 
-Source:
-
-```css
-p {
-  border-left: 1px;
-}
-```
-
-Yields:
-
-```css
-p {
-  border-right: 1px;
-}
-```
-
-### Rework
-
-Use css-flip as a [Rework](https://github.com/reworkcss/rework) plugin with
-`flip.rework()`.
+As a [Rework](https://github.com/reworkcss/rework) plugin:
 
 ```js
 var flip = require('css-flip');
 var rework = require('rework');
+var css = 'div { float: left; }';
 
-rework(css).use(flip.rework());
+rework(css).use(flip.rework()).toString();
+// => 'div { float: right; }'
 ```
+
+## Supported CSS Properties (a-z)
+
+`background-position`,
+`background-position-x`,
+`border-bottom-left-radius`,
+`border-bottom-right-radius`,
+`border-color`,
+`border-left`,
+`border-left-color`,
+`border-left-style`,
+`border-left-width`,
+`border-radius`,
+`border-right`,
+`border-right-color`,
+`border-right-style`,
+`border-right-width`,
+`border-style`,
+`border-top-left-radius`,
+`border-top-right-radius`,
+`border-width`,
+`box-shadow`,
+`clear`,
+`direction`,
+`float`,
+`left`,
+`margin`,
+`margin-left`,
+`margin-right`,
+`padding`,
+`padding-left`,
+`padding-right`,
+`right`,
+`text-align`
+
+## Processing directives
+
+css-flip provides a way to ignore declarations or rules that should not be
+flipped.
 
 ### @noflip
 
-Use the `@noflip` directive to prevent a single declaration from being flipped.
+Prevent a single declaration from being flipped.
 
 Source:
 
@@ -65,7 +90,7 @@ p {
 }
 ```
 
-Use the `@noflip` directive to prevent entire rules from being flipped.
+Prevent all declarations in a rule from being flipped.
 
 Source:
 
@@ -128,12 +153,6 @@ Run Mocha unit tests in "watch" mode:
 ```
 npm run watch
 ```
-
-## Known issues
-
-Some complex CSS features including multiple backgrounds, CSS3 positioning,
-CSS3 transforms, `background-image`, `border-image`, and `text-shadow` are
-not supported.
 
 ## License and Acknowledgements
 
