@@ -66,7 +66,7 @@ rework(css).use(flip.rework()).toString();
 ## Processing directives
 
 css-flip provides a way to ignore declarations or rules that should not be
-flipped.
+flipped, and precisely replace property values.
 
 ### @noflip
 
@@ -85,7 +85,7 @@ Yields:
 
 ```css
 p {
-  /*@noflip*/ float: left;
+  float: left;
   clear: right;
 }
 ```
@@ -105,10 +105,33 @@ p {
 Yields:
 
 ```css
-/*@noflip*/
 p {
   float: left;
   clear: left;
+}
+```
+
+### @replace
+
+Replace the value of a single declaration. Useful for custom LTR/RTL
+adjustments, e.g., changing background sprite positions or using a
+different glyph in an icon font.
+
+Source:
+
+```css
+p {
+  /*@replace: -32px -32px*/ background-position: -32px 0;
+  /*@replace: ">"*/ content: "<";
+}
+```
+
+Yields:
+
+```css
+p {
+  background-position: -32px -32px;
+  content: ">";
 }
 ```
 

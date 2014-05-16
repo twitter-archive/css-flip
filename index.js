@@ -18,6 +18,7 @@ var quad = require('./lib/quad');
 
 var RE_IMPORTANT = /\s*!important/;
 var RE_NOFLIP = /@noflip/;
+var RE_REPLACE = /@replace:\s*(.*)?/;
 
 /**
  * Exports
@@ -71,7 +72,7 @@ function flipNode(node) {
   rules.forEach(function (rule, i, all) {
     if (rule.declarations) {
       if (isFlippable(rule, all[i - 1])) {
-        flipDeclarations(rule.declarations);
+        processDeclarations(rule.declarations);
       }
     } else {
       flipNode(rule);
@@ -100,6 +101,26 @@ function isFlippable(node, prevNode) {
 }
 
 /**
+ * Return whether the given `node` is replaceable.
+ *
+ * @param {Object} node
+ * @param {Object} prevNode used for @noflip detection
+ * @returns {Boolean}
+ */
+
+function isReplaceable(node, prevNode) {
+  if (node.type == 'comment') {
+    return false;
+  }
+
+  if (prevNode && prevNode.type == 'comment') {
+    return RE_REPLACE.test(prevNode.comment);
+  }
+
+  return false;
+}
+
+/**
  * BiDi flip the given `declaration`.
  *
  * @param {Object} declaration
@@ -115,14 +136,32 @@ function flipDeclaration(declaration) {
 }
 
 /**
- * BiDi flip a list of `declarations`.
+ * Replace the given `declaration` value.
+ *
+ * @param {Object} declaration
+ */
+
+function replaceDeclaration(declaration, prevNode) {
+  declaration.value = prevNode.comment.match(RE_REPLACE)[1];
+
+  return declaration;
+}
+
+/**
+ * BiDi flip or replace a list of `declarations`.
  *
  * @param {Array} declarations
  */
 
-function flipDeclarations(declarations) {
+function processDeclarations(declarations) {
   return declarations.map(function (declaration, i, all) {
-    if (isFlippable(declaration, all[i - 1])) {
+    var prevNode = all[i - 1];
+
+    if (isReplaceable(declaration, prevNode)) {
+      return replaceDeclaration(declaration, prevNode);
+    }
+
+    if (isFlippable(declaration, prevNode)) {
       return flipDeclaration(declaration);
     }
 
@@ -163,7 +202,6 @@ function flipValue(property, value) {
 
   return newValue;
 }
-
 
 // -- Replacement Maps ---------------------------------------------------------
 
