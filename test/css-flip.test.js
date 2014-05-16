@@ -280,6 +280,14 @@ describe('@noflip', function () {
   });
 });
 
+describe('@replace', function () {
+  it('should replace individual declaration value', function () {
+    ensure('p{/*@replace:-30px 0*/background-position:0 0;}', 'p{background-position:-30px 0;}');
+    ensure('p{/*@replace:linear-gradient(to right, blue, green)*/background:linear-gradient(to left, blue, green);}', 'p{background:linear-gradient(to right, blue, green);}');
+    ensure('p{/*@replace:"<°"*/content:">°";}', 'p{content:"<°";}');
+  });
+});
+
 describe('nested blocks', function () {
   it('should be flipped', function () {
     ensure('@keyframes foo{from{float:left;}to{float:right;}}',
