@@ -104,7 +104,7 @@ function isFlippable(node, prevNode) {
  * Return whether the given `node` is replaceable.
  *
  * @param {Object} node
- * @param {Object} prevNode used for @noflip detection
+ * @param {Object} prevNode used for @replace detection
  * @returns {Boolean}
  */
 
@@ -118,33 +118,6 @@ function isReplaceable(node, prevNode) {
   }
 
   return false;
-}
-
-/**
- * BiDi flip the given `declaration`.
- *
- * @param {Object} declaration
- */
-
-function flipDeclaration(declaration) {
-  var name = (declaration.property || declaration.name).toLowerCase();
-
-  declaration.property = flipProperty(name);
-  declaration.value = flipValue(name, declaration.value);
-
-  return declaration;
-}
-
-/**
- * Replace the given `declaration` value.
- *
- * @param {Object} declaration
- */
-
-function replaceDeclaration(declaration, prevNode) {
-  declaration.value = prevNode.comment.match(RE_REPLACE)[1];
-
-  return declaration;
 }
 
 /**
@@ -170,25 +143,57 @@ function processDeclarations(declarations) {
 }
 
 /**
- * BiDi flip the given `property`.
+ * Replace the given `declaration` value.
  *
- * @param {String} property
- * @return {String}
+ * @param {Object} declaration
  */
 
-function flipProperty(property) {
-  return PROPERTIES.hasOwnProperty(property) ? PROPERTIES[property] : property;
+function replaceDeclaration(declaration, prevNode) {
+  declaration.value = prevNode.comment.match(RE_REPLACE)[1];
+
+  return declaration;
 }
 
 /**
- * BiDi flip the given `value`.
+ * BiDi flip the given `declaration`.
  *
- * @param {String} property
- * @param {String} value
+ * @param {Object} declaration
+ */
+
+function flipDeclaration(declaration) {
+  declaration = flipDeclarationProperty(declaration);
+  declaration = flipDeclarationValue(declaration);
+
+  return declaration;
+}
+
+/**
+ * BiDi flip the property of the given `declaration`.
+ *
+ * @param {String} declaration
  * @return {String}
  */
 
-function flipValue(property, value) {
+function flipDeclarationProperty(declaration) {
+  var property = declaration.property;
+  var normalizedProperty = property.toLowerCase();
+
+  declaration.property = PROPERTIES.hasOwnProperty(normalizedProperty) ? PROPERTIES[normalizedProperty] : property;
+
+  return declaration;
+}
+
+/**
+ * BiDi flip the value of the given `declaration`.
+ *
+ * @param {String} declaration
+ * @return {String}
+ */
+
+function flipDeclarationValue(declaration) {
+  var property = declaration.property;
+  var value = declaration.value;
+
   var flipFn = VALUES.hasOwnProperty(property) ? VALUES[property] : false;
 
   if (!flipFn) { return value; }
@@ -200,7 +205,9 @@ function flipValue(property, value) {
     newValue += important[0];
   }
 
-  return newValue;
+  declaration.value = newValue;
+
+  return declaration;
 }
 
 // -- Replacement Maps ---------------------------------------------------------
