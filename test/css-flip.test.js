@@ -299,18 +299,22 @@ describe('nested blocks', function () {
 });
 
 describe('lettercase', function () {
-  it('should downcase property names', function () {
+  it('should not lowercase property names that have not been flipped', function () {
+    ensure(':root{--Custom-prop:red;}', ':root{--Custom-prop:red;}');
+  });
+
+  it('should lowercase property names that have been flipped', function () {
     ensure('p{BORDER-LEFT:1px;}', 'p{border-right:1px;}');
   });
 
-  it('should not downcase property values', function () {
-    ensure('p{BORDER-LEFT:1PX;}', 'p{border-right:1PX;}');
+  it('should not lowercase property values', function () {
+    ensure('p{border-left:1PX;}', 'p{border-right:1PX;}');
   });
 });
 
 describe('invalid CSS', function () {
   it('should not crash', function () {
-    ensure('p{__proto__:42;toString:lolwat;}', 'p{__proto__:42;tostring:lolwat;}');
+    ensure('p{__proto__:42;toString:lolwat;}', 'p{__proto__:42;toString:lolwat;}');
   });
 });
 
