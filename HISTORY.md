@@ -1,5 +1,7 @@
 # css-flip history
 
+## 0.4.0 - 19 May 2014
+
 - Don't modify names of unflipped properties.
 - Add `@replace` directive to perform a precise value substitution.
 
