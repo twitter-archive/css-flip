@@ -14,7 +14,6 @@ describe('background-position', function () {
     ensure('p{background-position:20px;}', 'p{background-position:right 20px;}');
     ensure('p{background-position:20% top;}', 'p{background-position:80% top;}');
     ensure('p{background-position:0 0;}', 'p{background-position:100% 0;}');
-
     ensure('p{background-position:24.5% 0;}', 'p{background-position:75.5% 0;}');
 
     ensure('p{background-position-x:20%;}', 'p{background-position-x:80%;}');
@@ -116,23 +115,15 @@ describe('border-color', function () {
 describe('border-radius', function () {
   it('should flip border-radius', function () {
     ensure('p{border-radius:0;}');
-    ensure('p{-moz-border-radius:0;}');
-    ensure('p{-webkit-border-radius:0;}');
 
     // top-left+bottom-right top-right+bottom-left
     ensure('p{border-radius:0 1px;}', 'p{border-radius:1px 0;}');
-    ensure('p{-moz-border-radius:0 1px;}', 'p{-moz-border-radius:1px 0;}');
-    ensure('p{-webkit-border-radius:0 1px;}', 'p{-webkit-border-radius:1px 0;}');
 
     // top-left top-right+bottom-left bottom-right
     ensure('p{border-radius:0 1px 2px;}', 'p{border-radius:1px 0 1px 2px;}');
-    ensure('p{-moz-border-radius:0 1px 2px;}', 'p{-moz-border-radius:1px 0 1px 2px;}');
-    ensure('p{-webkit-border-radius:0 1px 2px;}', 'p{-webkit-border-radius:1px 0 1px 2px;}');
 
     // top-left top-right bottom-left bottom-right
     ensure('p{border-radius:0 1px 2px 3px;}', 'p{border-radius:1px 0 3px 2px;}');
-    ensure('p{-moz-border-radius:0 1px 2px 3px;}', 'p{-moz-border-radius:1px 0 3px 2px;}');
-    ensure('p{-webkit-border-radius:0 1px 2px 3px;}', 'p{-webkit-border-radius:1px 0 3px 2px;}');
   });
 
   it('should flip elliptical values', function () {
@@ -152,26 +143,18 @@ describe('border-radius', function () {
 
   it('should flip border-top-left-radius', function () {
     ensure('p{border-top-left-radius:0;}', 'p{border-top-right-radius:0;}');
-    ensure('p{-moz-border-radius-topleft:0;}', 'p{-moz-border-radius-topright:0;}');
-    ensure('p{-webkit-border-top-left-radius:0;}', 'p{-webkit-border-top-right-radius:0;}');
   });
 
   it('should flip border-top-right-radius', function () {
     ensure('p{border-top-right-radius:0;}', 'p{border-top-left-radius:0;}');
-    ensure('p{-moz-border-radius-topright:0;}', 'p{-moz-border-radius-topleft:0;}');
-    ensure('p{-webkit-border-top-right-radius:0;}', 'p{-webkit-border-top-left-radius:0;}');
   });
 
   it('should flip border-bottom-left-radius', function () {
     ensure('p{border-bottom-left-radius:0;}', 'p{border-bottom-right-radius:0;}');
-    ensure('p{-moz-border-radius-bottomleft:0;}', 'p{-moz-border-radius-bottomright:0;}');
-    ensure('p{-webkit-border-bottom-left-radius:0;}', 'p{-webkit-border-bottom-right-radius:0;}');
   });
 
   it('should flip border-bottom-right-radius', function () {
     ensure('p{border-bottom-right-radius:0;}', 'p{border-bottom-left-radius:0;}');
-    ensure('p{-moz-border-radius-bottomright:0;}', 'p{-moz-border-radius-bottomleft:0;}');
-    ensure('p{-webkit-border-bottom-right-radius:0;}', 'p{-webkit-border-bottom-left-radius:0;}');
   });
 });
 
