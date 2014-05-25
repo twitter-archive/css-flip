@@ -1,5 +1,9 @@
 # css-flip history
 
+- Add support for `transition` and `transition-property`.
+- Drop support for non-standard `border-radius`.
+- Fix CLI.
+
 ## 0.4.0 - 19 May 2014
 
 - Don't modify names of unflipped properties.

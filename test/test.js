@@ -1,4 +1,5 @@
 var assert = require('assert');
+var css = require('css');
 var flip = require('..');
 
 function ensure(input, output, options) {
@@ -317,15 +318,12 @@ describe('invalid CSS', function () {
 });
 
 describe('rework', function () {
-  var reworkFlip = flip.rework();
-  var css = require('css');
-
   var input = 'p{border-left:1px;}';
   var expect = 'p{border-right:1px;}';
 
   it('should support the Rework API', function () {
     var ast = css.parse(input);
-    reworkFlip(ast.stylesheet);
+    flip.rework()(ast.stylesheet);
     var out = css.stringify(ast, {compress: true});
 
     assert.equal(out, expect, out + ' != ' + expect);
