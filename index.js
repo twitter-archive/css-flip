@@ -11,6 +11,7 @@ var boxShadow = require('./lib/box-shadow');
 var borderRadius = require('./lib/border-radius');
 var leftRight = require('./lib/left-right');
 var quad = require('./lib/quad');
+var flipProperty = require('./lib/flipProperty');
 
 /**
  * Constants
@@ -161,24 +162,8 @@ function replaceDeclaration(declaration, prevNode) {
  */
 
 function flipDeclaration(declaration) {
-  declaration = flipDeclarationProperty(declaration);
+  declaration.property = flipProperty(declaration.property);
   declaration = flipDeclarationValue(declaration);
-
-  return declaration;
-}
-
-/**
- * BiDi flip the property of the given `declaration`.
- *
- * @param {String} declaration
- * @return {String}
- */
-
-function flipDeclarationProperty(declaration) {
-  var property = declaration.property;
-  var normalizedProperty = property.toLowerCase();
-
-  declaration.property = PROPERTIES.hasOwnProperty(normalizedProperty) ? PROPERTIES[normalizedProperty] : property;
 
   return declaration;
 }
@@ -211,31 +196,6 @@ function flipDeclarationValue(declaration) {
 }
 
 // -- Replacement Maps ---------------------------------------------------------
-
-/**
- * Map of property names to their BiDi equivalent.
- */
-
-var PROPERTIES = {
-  'margin-left': 'margin-right',
-  'margin-right': 'margin-left',
-  'padding-left': 'padding-right',
-  'padding-right': 'padding-left',
-  'border-left': 'border-right',
-  'border-right': 'border-left',
-  'border-left-color': 'border-right-color',
-  'border-right-color': 'border-left-color',
-  'border-left-width': 'border-right-width',
-  'border-right-width': 'border-left-width',
-  'border-left-style': 'border-right-style',
-  'border-right-style': 'border-left-style',
-  'border-bottom-right-radius': 'border-bottom-left-radius',
-  'border-bottom-left-radius': 'border-bottom-right-radius',
-  'border-top-right-radius': 'border-top-left-radius',
-  'border-top-left-radius': 'border-top-right-radius',
-  'left': 'right',
-  'right': 'left'
-};
 
 /**
  * Map of property values to their BiDi flipping functions.
