@@ -4,7 +4,7 @@
 
 var fs = require('fs');
 var program = require('commander');
-var flip = require('../lib/css-flip');
+var flip = require('..');
 
 program
   .usage('[options] <file ...>\n\n  css-flip is a CSS BiDi flipper.')
@@ -41,12 +41,12 @@ function done(css) {
 // Flips each file and passes the concatenated result to the callback.
 function flipFiles(files, options, cb) {
   var css = files.reduce(function (acc, file) {
-      if (!fs.existsSync(file)) {
-        return acc;
-      }
+    if (!fs.existsSync(file)) {
+      return acc;
+    }
 
-      return acc.concat(flip(fs.readFileSync(file, 'utf8'), options));
-    }, []);
+    return acc.concat(flip(fs.readFileSync(file, 'utf8'), options));
+  }, []);
 
   cb(css.join('\n'));
 }
