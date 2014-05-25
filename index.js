@@ -1,7 +1,7 @@
 /* Copyright 2014 Twitter, Inc. and other contributors; Licensed MIT */
 
 /**
- * Dependencies
+ * Module dependencies.
  */
 
 var css = require('css');
@@ -9,71 +9,11 @@ var flipProperty = require('./lib/flipProperty');
 var flipValueOf = require('./lib/flipValueOf');
 
 /**
- * Constants
+ * Constants.
  */
 
 var RE_NOFLIP = /@noflip/;
 var RE_REPLACE = /@replace:\s*(.*)?/;
-
-/**
- * Exports
- */
-
-exports = module.exports = flip;
-exports.rework = rework;
-
-
-/**
- * BiDi flip a CSS string.
- *
- * @param {String} str
- * @param {Object} [options]
- *   @param {Boolean} [options.compress] Whether to slightly compress output.
- *     Some newlines and indentation are removed. Comments stay intact.
- *   @param {String} [options.indent] Default is `'  '` (two spaces).
- * @returns {String}
- */
-
-function flip(str, options) {
-  var ast = css.parse(str, options);
-
-  flipNode(ast.stylesheet);
-
-  return css.stringify(ast, options);
-}
-
-/**
- * A Rework compatible filter.
- *
- * @returns {Function}
- *   @param {Object} stylesheet A `stylesheet` AST node.
- */
-
-function rework() {
-  return flipNode;
-}
-
-/**
- * BiDi flip a single AST `node`. If the node contains rules, each rule is
- * passed recursively to `flipNode()`. If the node contains declarations,
- * each flippable declaration is flipped.
- *
- * @param {Object} node
- */
-
-function flipNode(node) {
-  var rules = node.rules || node.keyframes || [];
-
-  rules.forEach(function (rule, i, all) {
-    if (rule.declarations) {
-      if (isFlippable(rule, all[i - 1])) {
-        processDeclarations(rule.declarations);
-      }
-    } else {
-      flipNode(rule);
-    }
-  });
-}
 
 /**
  * Return whether the given `node` is flippable.
@@ -126,11 +66,12 @@ function processDeclarations(declarations) {
     var prevNode = all[i - 1];
 
     if (isReplaceable(declaration, prevNode)) {
-      return replaceDeclaration(declaration, prevNode);
+      declaration.value = prevNode.comment.match(RE_REPLACE)[1];
     }
 
-    if (isFlippable(declaration, prevNode)) {
-      return flipDeclaration(declaration);
+    else if (isFlippable(declaration, prevNode)) {
+      declaration.property = flipProperty(declaration.property);
+      declaration.value = flipValueOf(declaration.property, declaration.value);
     }
 
     return declaration;
@@ -138,26 +79,60 @@ function processDeclarations(declarations) {
 }
 
 /**
- * Replace the given `declaration` value.
+ * BiDi flip a single AST `node`. If the node contains rules, each rule is
+ * passed recursively to `flipNode()`. If the node contains declarations,
+ * each flippable declaration is flipped.
  *
- * @param {Object} declaration
+ * @param {Object} node
  */
 
-function replaceDeclaration(declaration, prevNode) {
-  declaration.value = prevNode.comment.match(RE_REPLACE)[1];
+function flipNode(node) {
+  var rules = node.rules || node.keyframes || [];
 
-  return declaration;
+  rules.forEach(function (rule, i, all) {
+    if (rule.declarations) {
+      if (isFlippable(rule, all[i - 1])) {
+        processDeclarations(rule.declarations);
+      }
+    } else {
+      flipNode(rule);
+    }
+  });
 }
 
 /**
- * BiDi flip the given `declaration`.
+ * BiDi flip a CSS string.
  *
- * @param {Object} declaration
+ * @param {String} str
+ * @param {Object} [options]
+ *   @param {Boolean} [options.compress] Whether to slightly compress output.
+ *     Some newlines and indentation are removed. Comments stay intact.
+ *   @param {String} [options.indent] Default is `'  '` (two spaces).
+ * @returns {String}
  */
 
-function flipDeclaration(declaration) {
-  declaration.property = flipProperty(declaration.property);
-  declaration.value = flipValueOf(declaration.property, declaration.value);
+function flip(str, options) {
+  var node = css.parse(str, options);
 
-  return declaration;
+  flipNode(node.stylesheet);
+
+  return css.stringify(node, options);
 }
+
+/**
+ * A Rework compatible filter.
+ *
+ * @returns {Function}
+ *   @param {Object} stylesheet A `stylesheet` AST node.
+ */
+
+function rework() {
+  return flipNode;
+}
+
+/**
+ * Module exports.
+ */
+
+exports = module.exports = flip;
+exports.rework = rework;
