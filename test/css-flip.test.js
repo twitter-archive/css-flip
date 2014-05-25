@@ -245,6 +245,21 @@ describe('text-align', function () {
   });
 });
 
+describe('transition', function () {
+  it('should flip properties', function () {
+    ensure('p{-webkit-transition:left 1s, top 1s;}', 'p{-webkit-transition:right 1s, top 1s;}');
+    ensure('p{transition:margin-right 1s ease;}', 'p{transition:margin-left 1s ease;}');
+  });
+});
+
+describe('transition-property', function () {
+  it('should flip properties', function () {
+    ensure('p{-webkit-transition-property:left;}', 'p{-webkit-transition-property:right;}');
+    ensure('p{transition-property:margin-right;}', 'p{transition-property:margin-left;}');
+    ensure('p{transition-property:left, right, padding-left, color;}', 'p{transition-property:right, left, padding-right, color;}');
+  });
+});
+
 describe('!important', function () {
   it('should be retained', function () {
     ensure('p{color:blue !important;}');
