@@ -5,19 +5,13 @@
  */
 
 var css = require('css');
-var direction = require('./lib/direction');
-var backgroundPosition = require('./lib/background-position');
-var boxShadow = require('./lib/box-shadow');
-var borderRadius = require('./lib/border-radius');
-var leftRight = require('./lib/left-right');
-var quad = require('./lib/quad');
 var flipProperty = require('./lib/flipProperty');
+var flipValueOf = require('./lib/flipValueOf');
 
 /**
  * Constants
  */
 
-var RE_IMPORTANT = /\s*!important/;
 var RE_NOFLIP = /@noflip/;
 var RE_REPLACE = /@replace:\s*(.*)?/;
 
@@ -163,66 +157,7 @@ function replaceDeclaration(declaration, prevNode) {
 
 function flipDeclaration(declaration) {
   declaration.property = flipProperty(declaration.property);
-  declaration = flipDeclarationValue(declaration);
+  declaration.value = flipValueOf(declaration.property, declaration.value);
 
   return declaration;
 }
-
-/**
- * BiDi flip the value of the given `declaration`.
- *
- * @param {String} declaration
- * @return {String}
- */
-
-function flipDeclarationValue(declaration) {
-  var property = declaration.property;
-  var value = declaration.value;
-
-  var flipFn = VALUES.hasOwnProperty(property) ? VALUES[property] : false;
-
-  if (!flipFn) { return value; }
-
-  var important = value.match(RE_IMPORTANT);
-  var newValue = flipFn(value.replace(RE_IMPORTANT, '').trim(), property);
-
-  if (important && !RE_IMPORTANT.test(newValue)) {
-    newValue += important[0];
-  }
-
-  declaration.value = newValue;
-
-  return declaration;
-}
-
-// -- Replacement Maps ---------------------------------------------------------
-
-/**
- * Map of property values to their BiDi flipping functions.
- */
-
-var VALUES = {
-  'direction': direction,
-
-  'text-align': leftRight,
-  'float': leftRight,
-  'clear': leftRight,
-
-  '-webkit-border-radius': borderRadius,
-  '-moz-border-radius': borderRadius,
-  'border-radius': borderRadius,
-
-  'border-color': quad,
-  'border-width': quad,
-  'border-style': quad,
-  'padding': quad,
-  'margin': quad,
-
-  'background-position': backgroundPosition,
-  'background-position-x': backgroundPosition,
-  '-ms-background-position-x': backgroundPosition,
-
-  '-webkit-box-shadow': boxShadow,
-  '-moz-box-shadow': boxShadow,
-  'box-shadow': boxShadow
-};
