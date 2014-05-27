@@ -62,6 +62,8 @@ rework(css).use(flip.rework()).toString();
 `padding-right`,
 `right`,
 `text-align`
+`transition`
+`transition-property`
 
 ## Processing directives
 

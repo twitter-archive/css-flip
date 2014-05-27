@@ -1,84 +1,19 @@
 /* Copyright 2014 Twitter, Inc. and other contributors; Licensed MIT */
 
 /**
- * Dependencies
+ * Module dependencies.
  */
 
 var css = require('css');
-var direction = require('./lib/direction');
-var backgroundPosition = require('./lib/background-position');
-var boxShadow = require('./lib/box-shadow');
-var borderRadius = require('./lib/border-radius');
-var leftRight = require('./lib/left-right');
-var quad = require('./lib/quad');
+var flipProperty = require('./lib/flipProperty');
+var flipValueOf = require('./lib/flipValueOf');
 
 /**
- * Constants
+ * Constants.
  */
 
-var RE_IMPORTANT = /\s*!important/;
 var RE_NOFLIP = /@noflip/;
 var RE_REPLACE = /@replace:\s*(.*)?/;
-
-/**
- * Exports
- */
-
-exports = module.exports = flip;
-exports.rework = rework;
-
-
-/**
- * BiDi flip a CSS string.
- *
- * @param {String} str
- * @param {Object} [options]
- *   @param {Boolean} [options.compress] Whether to slightly compress output.
- *     Some newlines and indentation are removed. Comments stay intact.
- *   @param {String} [options.indent] Default is `'  '` (two spaces).
- * @returns {String}
- */
-
-function flip(str, options) {
-  var ast = css.parse(str, options);
-
-  flipNode(ast.stylesheet);
-
-  return css.stringify(ast, options);
-}
-
-/**
- * A Rework compatible filter.
- *
- * @returns {Function}
- *   @param {Object} stylesheet A `stylesheet` AST node.
- */
-
-function rework() {
-  return flipNode;
-}
-
-/**
- * BiDi flip a single AST `node`. If the node contains rules, each rule is
- * passed recursively to `flipNode()`. If the node contains declarations,
- * each flippable declaration is flipped.
- *
- * @param {Object} node
- */
-
-function flipNode(node) {
-  var rules = node.rules || node.keyframes || [];
-
-  rules.forEach(function (rule, i, all) {
-    if (rule.declarations) {
-      if (isFlippable(rule, all[i - 1])) {
-        processDeclarations(rule.declarations);
-      }
-    } else {
-      flipNode(rule);
-    }
-  });
-}
 
 /**
  * Return whether the given `node` is flippable.
@@ -131,11 +66,12 @@ function processDeclarations(declarations) {
     var prevNode = all[i - 1];
 
     if (isReplaceable(declaration, prevNode)) {
-      return replaceDeclaration(declaration, prevNode);
+      declaration.value = prevNode.comment.match(RE_REPLACE)[1];
     }
 
-    if (isFlippable(declaration, prevNode)) {
-      return flipDeclaration(declaration);
+    else if (isFlippable(declaration, prevNode)) {
+      declaration.property = flipProperty(declaration.property);
+      declaration.value = flipValueOf(declaration.property, declaration.value);
     }
 
     return declaration;
@@ -143,138 +79,60 @@ function processDeclarations(declarations) {
 }
 
 /**
- * Replace the given `declaration` value.
+ * BiDi flip a single AST `node`. If the node contains rules, each rule is
+ * passed recursively to `flipNode()`. If the node contains declarations,
+ * each flippable declaration is flipped.
  *
- * @param {Object} declaration
+ * @param {Object} node
  */
 
-function replaceDeclaration(declaration, prevNode) {
-  declaration.value = prevNode.comment.match(RE_REPLACE)[1];
+function flipNode(node) {
+  var rules = node.rules || node.keyframes || [];
 
-  return declaration;
+  rules.forEach(function (rule, i, all) {
+    if (rule.declarations) {
+      if (isFlippable(rule, all[i - 1])) {
+        processDeclarations(rule.declarations);
+      }
+    } else {
+      flipNode(rule);
+    }
+  });
 }
 
 /**
- * BiDi flip the given `declaration`.
+ * BiDi flip a CSS string.
  *
- * @param {Object} declaration
+ * @param {String} str
+ * @param {Object} [options]
+ *   @param {Boolean} [options.compress] Whether to slightly compress output.
+ *     Some newlines and indentation are removed. Comments stay intact.
+ *   @param {String} [options.indent] Default is `'  '` (two spaces).
+ * @returns {String}
  */
 
-function flipDeclaration(declaration) {
-  declaration = flipDeclarationProperty(declaration);
-  declaration = flipDeclarationValue(declaration);
+function flip(str, options) {
+  var node = css.parse(str, options);
 
-  return declaration;
+  flipNode(node.stylesheet);
+
+  return css.stringify(node, options);
 }
 
 /**
- * BiDi flip the property of the given `declaration`.
+ * A Rework compatible filter.
  *
- * @param {String} declaration
- * @return {String}
+ * @returns {Function}
+ *   @param {Object} stylesheet A `stylesheet` AST node.
  */
 
-function flipDeclarationProperty(declaration) {
-  var property = declaration.property;
-  var normalizedProperty = property.toLowerCase();
-
-  declaration.property = PROPERTIES.hasOwnProperty(normalizedProperty) ? PROPERTIES[normalizedProperty] : property;
-
-  return declaration;
+function rework() {
+  return flipNode;
 }
 
 /**
- * BiDi flip the value of the given `declaration`.
- *
- * @param {String} declaration
- * @return {String}
+ * Module exports.
  */
 
-function flipDeclarationValue(declaration) {
-  var property = declaration.property;
-  var value = declaration.value;
-
-  var flipFn = VALUES.hasOwnProperty(property) ? VALUES[property] : false;
-
-  if (!flipFn) { return value; }
-
-  var important = value.match(RE_IMPORTANT);
-  var newValue = flipFn(value.replace(RE_IMPORTANT, '').trim(), property);
-
-  if (important && !RE_IMPORTANT.test(newValue)) {
-    newValue += important[0];
-  }
-
-  declaration.value = newValue;
-
-  return declaration;
-}
-
-// -- Replacement Maps ---------------------------------------------------------
-
-/**
- * Map of property names to their BiDi equivalent.
- */
-
-var PROPERTIES = {
-  'margin-left': 'margin-right',
-  'margin-right': 'margin-left',
-  'padding-left': 'padding-right',
-  'padding-right': 'padding-left',
-  'border-left': 'border-right',
-  'border-right': 'border-left',
-  'border-left-color': 'border-right-color',
-  'border-right-color': 'border-left-color',
-  'border-left-width': 'border-right-width',
-  'border-right-width': 'border-left-width',
-  'border-left-style': 'border-right-style',
-  'border-right-style': 'border-left-style',
-  'border-radius-bottomleft': 'border-radius-bottomright',
-  'border-radius-bottomright': 'border-radius-bottomleft',
-  'border-bottom-right-radius': 'border-bottom-left-radius',
-  'border-bottom-left-radius': 'border-bottom-right-radius',
-  '-webkit-border-bottom-right-radius': '-webkit-border-bottom-left-radius',
-  '-webkit-border-bottom-left-radius': '-webkit-border-bottom-right-radius',
-  '-moz-border-radius-bottomright': '-moz-border-radius-bottomleft',
-  '-moz-border-radius-bottomleft': '-moz-border-radius-bottomright',
-  'border-radius-topleft': 'border-radius-topright',
-  'border-radius-topright': 'border-radius-topleft',
-  'border-top-right-radius': 'border-top-left-radius',
-  'border-top-left-radius': 'border-top-right-radius',
-  '-webkit-border-top-right-radius': '-webkit-border-top-left-radius',
-  '-webkit-border-top-left-radius': '-webkit-border-top-right-radius',
-  '-moz-border-radius-topright': '-moz-border-radius-topleft',
-  '-moz-border-radius-topleft': '-moz-border-radius-topright',
-  'left': 'right',
-  'right': 'left'
-};
-
-/**
- * Map of property values to their BiDi flipping functions.
- */
-
-var VALUES = {
-  'direction': direction,
-
-  'text-align': leftRight,
-  'float': leftRight,
-  'clear': leftRight,
-
-  '-webkit-border-radius': borderRadius,
-  '-moz-border-radius': borderRadius,
-  'border-radius': borderRadius,
-
-  'border-color': quad,
-  'border-width': quad,
-  'border-style': quad,
-  'padding': quad,
-  'margin': quad,
-
-  'background-position': backgroundPosition,
-  'background-position-x': backgroundPosition,
-  '-ms-background-position-x': backgroundPosition,
-
-  '-webkit-box-shadow': boxShadow,
-  '-moz-box-shadow': boxShadow,
-  'box-shadow': boxShadow
-};
+exports = module.exports = flip;
+exports.rework = rework;
