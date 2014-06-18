@@ -1,5 +1,6 @@
 # css-flip history
 
+- Only flip `background-position` X value of `0%` to `100%`.
 - Update to 'css' 2.0.0.
 - Add support for `transition` and `transition-property`.
 - Drop support for non-standard `border-radius`.
