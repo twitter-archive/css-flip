@@ -1,5 +1,6 @@
 # css-flip history
 
+- Support all valid CSS numbers for `background-position`.
 - Only flip `background-position` single value if it's a percentage.
 - Only flip `background-position` X value of `0%` to `100%`.
 - Update to 'css' 2.0.0.

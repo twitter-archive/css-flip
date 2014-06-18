@@ -16,6 +16,8 @@ describe('background-position', function () {
     ensure('p{background-position:20%;}', 'p{background-position:80%;}');
     ensure('p{background-position:0% 0;}', 'p{background-position:100% 0;}');
     ensure('p{background-position:24.5% 0;}', 'p{background-position:75.5% 0;}');
+    ensure('p{background-position:+2.45e1% 0;}', 'p{background-position:75.5% 0;}');
+    ensure('p{background-position:-20% 0;}', 'p{background-position:120% 0;}');
     ensure('p{background-position:20% top;}', 'p{background-position:80% top;}');
     ensure('p{background-position:100% 0;}', 'p{background-position:0% 0;}');
 
