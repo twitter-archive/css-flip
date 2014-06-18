@@ -1,5 +1,6 @@
 # css-flip history
 
+- Update to 'css' 2.0.0.
 - Add support for `transition` and `transition-property`.
 - Drop support for non-standard `border-radius`.
 - Fix CLI.
