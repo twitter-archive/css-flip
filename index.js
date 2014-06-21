@@ -112,6 +112,10 @@ function flipNode(node) {
  */
 
 function flip(str, options) {
+  if (typeof str != 'string') {
+    throw new Error('input is not a String.');
+  }
+
   var node = css.parse(str, options);
 
   flipNode(node.stylesheet);
